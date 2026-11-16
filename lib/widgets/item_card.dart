@@ -5,6 +5,8 @@ import 'package:myportofolio_mobile/models/item_homepage.dart';
 ///
 /// Pemilik kartu menentukan efek aksi, misalnya SnackBar atau navigasi. Kartu
 /// tidak perlu mengetahui halaman tujuan maupun cara autentikasi bekerja.
+/// Warna latar berasal dari model, sehingga setiap aksi memiliki warna sendiri
+/// tanpa percabangan berdasarkan teks tombol di dalam widget.
 class ItemCard extends StatelessWidget {
   final ItemHomepage item;
   final VoidCallback onTap;
@@ -18,7 +20,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.secondary,
+      color: item.backgroundColor,
       borderRadius: _borderRadius,
       clipBehavior: Clip.antiAlias,
       child: InkWell(

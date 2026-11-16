@@ -1,17 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/models/item_homepage.dart';
+import 'package:myportofolio_mobile/models/portfolio_profile.dart';
+import 'package:myportofolio_mobile/widgets/info_card.dart';
+import 'package:myportofolio_mobile/widgets/item_card.dart';
 
+/// Halaman utama yang menyusun informasi profil dan pilihan menu.
+///
+/// Tidak ada data lokal yang berubah saat tombol ditekan. Umpan balik dikelola
+/// oleh [ScaffoldMessenger], sehingga halaman cukup berupa [StatelessWidget]
+/// tanpa [State] atau pemanggilan `setState`.
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
+  /// Profil diberikan oleh bootstrap agar halaman tidak menyimpan identitas
+  /// tertentu dan dapat digunakan kembali dengan data pemilik yang berbeda.
+  final PortfolioProfile profile;
 
-  final String npm = '2406000001';
-  final String nama = 'Burhan';
-  final String kelas = 'PBP A';
+  const MyHomePage({super.key, required this.profile});
 
-  final List<ItemHomepage> items = const [
+  // Konfigurasi tetap dibagikan oleh semua instance halaman. List dan isinya
+  // bersifat konstan, sehingga tidak dialokasikan ulang setiap kali build.
+  static const List<ItemHomepage> _items = [
     ItemHomepage('Lihat Proyek', Icons.folder),
     ItemHomepage('Tambah Proyek', Icons.add_circle),
     ItemHomepage('Logout', Icons.logout),
   ];
+
+  /// Menangani aksi di tingkat halaman agar kartu hanya mengurus tampilan.
+  ///
+  /// Tutorial ini menampilkan umpan balik saja, termasuk untuk tombol Logout.
+  /// Saat navigasi/autentikasi ditambahkan, perilaku dapat diubah di sini tanpa
+  /// mengikat widget kartu pada rute atau layanan tertentu.
+  void _handleMenuAction(BuildContext context, ItemHomepage item) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('Kamu telah menekan tombol ${item.name}!')),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,121 +48,69 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: InfoCard(title: 'NPM', content: npm),
-                  ),
-                  Expanded(
-                    child: InfoCard(title: 'Name', content: nama),
-                  ),
-                  Expanded(
-                    child: InfoCard(title: 'Class', content: kelas),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16.0),
-              const Padding(
-                padding: EdgeInsets.only(top: 16.0),
-                child: Text(
-                  'Selamat datang di MyPortfolio Mobile!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+        // Satu viewport menangani profil dan grid. SliverGrid menghindari
+        // pengukuran shrinkWrap pada grid di dalam scroll view lain.
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Row(
+                      // Tinggi kartu mengikuti isi nama, tanpa pengukuran
+                      // IntrinsicHeight tambahan atau pemotongan teks.
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: InfoCard(title: 'NPM', content: profile.npm),
+                        ),
+                        Expanded(
+                          child: InfoCard(
+                            title: 'Name',
+                            content: profile.fullName,
+                          ),
+                        ),
+                        Expanded(
+                          child: InfoCard(
+                            title: 'Class',
+                            content: profile.pbpClass,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32.0),
+                    const Text(
+                      'Selamat datang di MyPortfolio Mobile!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              GridView.count(
-                primary: false,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20.0),
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                crossAxisCount: 3,
-                mainAxisExtent: 144.0,
-                shrinkWrap: true,
-                children: items.map((item) => ItemCard(item)).toList(),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class InfoCard extends StatelessWidget {
-  final String title;
-  final String content;
-
-  const InfoCard({super.key, required this.title, required this.content});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2.0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8.0),
-            Text(content, textAlign: TextAlign.center),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ItemHomepage {
-  final String name;
-  final IconData icon;
-
-  const ItemHomepage(this.name, this.icon);
-}
-
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.secondary,
-      borderRadius: BorderRadius.circular(12.0),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12.0),
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text('Kamu telah menekan tombol ${item.name}!'),
-              ),
-            );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.icon, color: Colors.white, size: 30.0),
-                const SizedBox(height: 6.0),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
             ),
-          ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(36.0, 20.0, 36.0, 36.0),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 10.0,
+                  mainAxisSpacing: 10.0,
+                  mainAxisExtent: 144.0,
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final item = _items[index];
+                  return ItemCard(
+                    item,
+                    onTap: () => _handleMenuAction(context, item),
+                  );
+                }, childCount: _items.length),
+              ),
+            ),
+          ],
         ),
       ),
     );

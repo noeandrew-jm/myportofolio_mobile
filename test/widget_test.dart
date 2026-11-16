@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:myportofolio_mobile/data/portfolio_owner.dart';
 import 'package:myportofolio_mobile/main.dart';
+import 'package:myportofolio_mobile/menu.dart';
+import 'package:myportofolio_mobile/models/portfolio_profile.dart';
+import 'package:myportofolio_mobile/widgets/info_card.dart';
 
 void main() {
   testWidgets('Portfolio displays profile and menu on a narrow screen', (
@@ -14,13 +19,78 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     expect(find.text('MyPortfolio'), findsOneWidget);
-    expect(find.text('2406000001'), findsOneWidget);
-    expect(find.text('Burhan'), findsOneWidget);
-    expect(find.text('PBP A'), findsOneWidget);
+    expect(find.byType(InfoCard), findsNWidgets(3));
+    for (final field in {
+      'NPM': portfolioOwner.npm,
+      'Name': portfolioOwner.fullName,
+      'Class': portfolioOwner.pbpClass,
+    }.entries) {
+      final card = find.ancestor(
+        of: find.text(field.key),
+        matching: find.byType(InfoCard),
+      );
+
+      expect(card, findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text(field.value)),
+        findsOneWidget,
+      );
+    }
+    expect(find.text('Burhan'), findsNothing);
     expect(find.text('Selamat datang di MyPortfolio Mobile!'), findsOneWidget);
-    expect(find.text('Lihat Proyek'), findsOneWidget);
-    expect(find.text('Tambah Proyek'), findsOneWidget);
-    expect(find.text('Logout'), findsOneWidget);
+    for (final action in ['Lihat Proyek', 'Tambah Proyek', 'Logout']) {
+      await tester.scrollUntilVisible(
+        find.text(action),
+        100.0,
+        scrollable: find.byType(Scrollable),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(action).hitTestable(), findsOneWidget);
+    }
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Injected long profile name wraps fully on a narrow screen', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const profile = PortfolioProfile(
+      npm: '1234567890',
+      fullName: 'Nama Lengkap Mahasiswa Dengan Banyak Kata Untuk Pengujian',
+      pbpClass: 'PBP Z',
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(home: MyHomePage(profile: profile)),
+    );
+
+    expect(find.byType(InfoCard), findsNWidgets(3));
+    expect(find.text(profile.npm), findsOneWidget);
+    expect(find.text(profile.pbpClass), findsOneWidget);
+    final name = find.text(profile.fullName);
+    expect(name, findsOneWidget);
+    final paragraph = tester.renderObject<RenderParagraph>(name);
+    expect(paragraph.didExceedMaxLines, isFalse);
+    final nameCard = find.ancestor(of: name, matching: find.byType(InfoCard));
+    final cardBounds = tester.getRect(nameCard);
+    final textBounds = tester.getRect(name);
+    expect(cardBounds.contains(textBounds.topLeft), isTrue);
+    expect(cardBounds.contains(textBounds.bottomRight), isTrue);
+    expect(tester.takeException(), isNull);
+
+    // A taller profile must still allow access to the menu below it.
+    await tester.scrollUntilVisible(
+      find.text('Logout'),
+      100.0,
+      scrollable: find.byType(Scrollable),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Logout'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kamu telah menekan tombol Logout!'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -30,6 +100,12 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     for (final action in ['Lihat Proyek', 'Tambah Proyek', 'Logout']) {
+      await tester.scrollUntilVisible(
+        find.text(action),
+        100.0,
+        scrollable: find.byType(Scrollable),
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text(action));
       await tester.pumpAndSettle();
 

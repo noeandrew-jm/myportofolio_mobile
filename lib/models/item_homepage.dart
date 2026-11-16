@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show IconData;
+import 'package:flutter/material.dart' show Color, IconData;
 
 /// Deskripsi immutable sebuah pilihan menu, tanpa perilaku atau BuildContext.
 ///
@@ -8,5 +8,8 @@ class ItemHomepage {
   final String name;
   final IconData icon;
 
-  const ItemHomepage(this.name, this.icon);
+  /// Warna eksplisit per aksi, tanpa bergantung pada indeks atau nama tombol.
+  final Color backgroundColor;
+
+  const ItemHomepage(this.name, this.icon, {required this.backgroundColor});
 }

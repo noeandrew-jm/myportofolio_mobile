@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/data/portfolio_actions.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
@@ -15,14 +16,6 @@ class MyHomePage extends StatelessWidget {
   final PortfolioProfile profile;
 
   const MyHomePage({super.key, required this.profile});
-
-  // Konfigurasi tetap dibagikan oleh semua instance halaman. List dan isinya
-  // bersifat konstan, sehingga tidak dialokasikan ulang setiap kali build.
-  static const List<ItemHomepage> _items = [
-    ItemHomepage('Lihat Proyek', Icons.folder),
-    ItemHomepage('Tambah Proyek', Icons.add_circle),
-    ItemHomepage('Logout', Icons.logout),
-  ];
 
   /// Menangani aksi di tingkat halaman agar kartu hanya mengurus tampilan.
   ///
@@ -102,12 +95,12 @@ class MyHomePage extends StatelessWidget {
                   mainAxisExtent: 144.0,
                 ),
                 delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = _items[index];
+                  final item = portfolioActions[index];
                   return ItemCard(
                     item,
                     onTap: () => _handleMenuAction(context, item),
                   );
-                }, childCount: _items.length),
+                }, childCount: portfolioActions.length),
               ),
             ),
           ],

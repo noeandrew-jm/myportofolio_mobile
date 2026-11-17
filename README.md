@@ -1,6 +1,8 @@
 # MyPortfolio Mobile
 
-Kelanjutan proyek Flutter Tutorial 08 dengan halaman profil dan tiga aksi menu.
+Kelanjutan proyek Flutter Tutorial 08 dengan desain dan konten dari portofolio
+web Noe Andrew. Tema gelap, aksen ungu, judul perak, font Kanit, foto profil,
+serta gambar karya mengikuti referensi web.
 
 ## Halaman utama
 
@@ -8,6 +10,11 @@ Kelanjutan proyek Flutter Tutorial 08 dengan halaman profil dan tiga aksi menu.
 - `MyHomePage` di `lib/menu.dart` merupakan `StatelessWidget`, terpisah dari bootstrap.
 - Tiga `InfoCard` menampilkan **NPM**, **Name**, dan **Class** dari konfigurasi identitas `lib/data/portfolio_owner.dart` melalui model `PortfolioProfile`.
 - Nama lengkap membungkus ke beberapa baris tanpa pemotongan; tiga kartu tetap sejajar di bagian atas.
+- Profil lengkap, bio, kontak, satu proyek, tiga pengalaman, dan dua prestasi
+  disimpan sebagai data lokal di `lib/data/portfolio_content.dart`.
+- Navigasi **Projects**, **Experience**, dan **Achievements** membuka koleksi
+  dari arsip web. **View my work** membuka Projects. Email, GitHub, LinkedIn,
+  dan tautan proyek dibuka melalui aplikasi perangkat.
 
 ## Aksi menu
 
@@ -19,7 +26,9 @@ Label, ikon, dan warna didefinisikan dalam konstanta `portfolioActions` di `lib/
 | Tambah Proyek | `Icons.add_circle` | Hijau `#2E7D32` | `Kamu telah menekan tombol Tambah Proyek!` |
 | Logout | `Icons.logout` | Merah `#C62828` | `Kamu telah menekan tombol Logout!` |
 
-Setiap tombol menampilkan SnackBar sesuai labelnya. Navigasi dan autentikasi belum diterapkan.
+Ketiga kartu aksi menampilkan SnackBar sesuai labelnya. Tambah Proyek dan Logout
+masih berupa umpan balik untuk Tugas 7. Navigasi koleksi tersedia melalui menu
+halaman dan tombol View my work.
 
 ## Pemisahan kode dan optimasi
 
@@ -27,6 +36,9 @@ Setiap tombol menampilkan SnackBar sesuai labelnya. Navigasi dan autentikasi bel
 - `ItemCard` menerima data `ItemHomepage` dan callback `onTap`; halaman menangani SnackBar melalui `ScaffoldMessenger`.
 - `CustomScrollView` dan `SliverGrid` memakai satu area gulir tanpa grid `shrinkWrap` bertingkat.
 - Docstring menjelaskan tanggung jawab model, halaman, dan kartu yang dapat digunakan kembali.
+- `PortfolioHero` dan `PortfolioCollectionPage` menyesuaikan susunan berdasarkan
+  lebar layar. Aset dan font dibundel agar profil dapat dibaca secara offline.
+  Lisensi Kanit tersedia di `assets/fonts/OFL.txt`.
 
 Validasi kualitas kode: `flutter analyze` dijalankan dari root proyek
 (`myportofolio_mobile/`) dan menghasilkan **No issues found!**. Pengujian widget
@@ -44,7 +56,7 @@ dapat dijalankan dengan `flutter test`.
 
 2. **Widget apa saja yang digunakan dan apa fungsinya?**
 
-   Berikut seluruh tipe widget yang dibuat secara eksplisit dalam kode produksi `lib/`: empat widget buatan proyek dan dua puluh widget Flutter. Fungsi di bawah menjelaskan pemakaiannya pada aplikasi ini.
+   Berikut widget yang digunakan dalam kode produksi `lib/` beserta fungsinya.
 
    | Widget | Fungsi dalam proyek |
    | --- | --- |
@@ -52,9 +64,13 @@ dapat dijalankan dengan `flutter test`.
    | `MyHomePage` | Menyusun halaman profil, menu, dan penanganan aksi. |
    | `InfoCard` | Komponen reusable untuk pasangan label dan nilai identitas. |
    | `ItemCard` | Komponen aksi dengan label, ikon, warna, dan callback. |
+   | `PortfolioHero` | Menyusun judul, foto, bio, peran, universitas, dan kontak sesuai desain web. |
+   | `_Portrait`, `_Introduction`, `_ContactButton` | Komponen privat untuk foto berlapis, informasi profil, dan tombol kontak pada hero. |
+   | `PortfolioCollectionPage` | Halaman koleksi Projects, Experience, atau Achievements dengan navigasi kembali. |
+   | `_CollectionIntroduction`, `_PortfolioEntryCard`, `_EntryDetails` | Komponen privat untuk judul koleksi, kartu adaptif, dan isi lengkap setiap entri. |
    | `MaterialApp` | Menyediakan lingkungan Material, tema, dan halaman awal. |
    | `Scaffold` | Menyediakan kerangka halaman melalui `appBar` dan `body`. |
-   | `AppBar` | Menampilkan judul MyPortfolio pada bilah atas. |
+   | `AppBar` | Menampilkan nama pemilik atau judul koleksi pada bilah atas. |
    | [SafeArea](https://api.flutter.dev/flutter/widgets/SafeArea-class.html) | Memberi inset agar body menghindari area sistem seperti notch. |
    | `CustomScrollView` | Menggabungkan bagian profil dan menu dalam satu area gulir. |
    | `SliverPadding` | Memberi jarak di sekitar bagian profil dan grid. |
@@ -72,12 +88,29 @@ dapat dijalankan dengan `flutter test`.
    | `Center` | Memusatkan susunan ikon dan label dalam kartu aksi. |
    | [Icon](https://api.flutter.dev/flutter/widgets/Icon-class.html) | Menampilkan simbol folder, tambah, dan logout. |
    | `SnackBar` | Menampilkan pesan sementara sesuai tombol yang ditekan. |
+   | `SnackBarAction` | Menawarkan salin tautan ketika aplikasi pembuka tidak tersedia. |
+   | `LayoutBuilder` | Membaca batas lebar untuk memilih susunan mobile atau desktop. |
+   | `ListView` | Membangun entri koleksi sesuai kebutuhan area gulir. |
+   | `Wrap` | Membungkus navigasi, tautan kontak, dan tag ke baris berikutnya. |
+   | `Flexible` | Memberi batas lebar judul AppBar pada layar sempit. |
+   | `ConstrainedBox` | Membatasi lebar halaman koleksi pada layar besar. |
+   | `Align` | Mengatur posisi judul menu di sisi kiri. |
+   | `AspectRatio` | Menjaga proporsi foto profil dan gambar koleksi. |
+   | `Stack`, `Positioned` | Menumpuk cahaya latar, tulisan, dan foto profil. |
+   | `DecoratedBox`, `ColoredBox`, `Container` | Menggambar gradien, warna permukaan, dan bingkai tag. |
+   | `ShaderMask` | Membuat judul perak dan efek memudar pada foto. |
+   | `Image` | Menampilkan foto, gambar proyek, dan dokumentasi prestasi dari aset lokal. |
+   | `FittedBox` | Menyesuaikan tulisan dekoratif PORTOFOLIO dengan lebar foto. |
+   | `Divider` | Memisahkan informasi profil, menu, dan footer. |
+   | `TextButton`, `OutlinedButton` | Membuka halaman koleksi, kontak, dan tautan proyek. |
+   | `PopupMenuButton`, `PopupMenuItem` | Menyediakan navigasi ringkas melalui menu AppBar. |
+   | `Semantics`, `ExcludeSemantics` | Menandai heading bagi pembaca layar dan mengabaikan tulisan dekoratif. |
 
    Rujukan fungsi bawaan: [widget layout](https://docs.flutter.dev/ui/widgets/layout), [komponen Material](https://docs.flutter.dev/ui/widgets/material), dan [SliverGrid](https://api.flutter.dev/flutter/widgets/SliverGrid-class.html).
 
-   `Theme` dan `ScaffoldMessenger` juga digunakan melalui pencarian ancestor, tetapi tidak dibuat langsung oleh kode halaman. `MaterialApp` menyediakan lingkungan tema dan root `ScaffoldMessenger`; messenger mengelola SnackBar bagi `Scaffold` turunannya. [Dokumentasi ScaffoldMessenger](https://docs.flutter.dev/release/breaking-changes/scaffold-messenger).
+   `Theme`, `MediaQuery`, `Navigator`, dan `ScaffoldMessenger` disediakan dalam lingkungan aplikasi oleh framework. `Navigator.of(context)` mengelola perpindahan halaman, `MediaQuery.textScalerOf(context)` membaca skala teks, dan `ScaffoldMessenger.of(context)` mengelola SnackBar bagi `Scaffold` turunannya. [Dokumentasi ScaffoldMessenger](https://docs.flutter.dev/release/breaking-changes/scaffold-messenger).
 
-   `ThemeData`, `ColorScheme`, `TextStyle`, `EdgeInsets`, `BorderRadius`, `Color`, dan `IconData` merupakan objek konfigurasi/data, bukan widget. Begitu pula model `PortfolioProfile`/`ItemHomepage` dan delegate `SliverChildBuilderDelegate`/`SliverGridDelegateWithFixedCrossAxisCount`: delegate mengatur pembangunan serta tata letak grid, bukan node widget tambahan.
+   `ThemeData`, `ColorScheme`, `TextStyle`, `EdgeInsets`, `BorderRadius`, `Color`, dan `IconData` merupakan objek konfigurasi/data, bukan widget. Begitu pula model `PortfolioProfile`, `PortfolioDetails`, `PortfolioEntry`, dan `ItemHomepage`. `MaterialPageRoute` mendeskripsikan rute, sedangkan delegate `SliverChildBuilderDelegate`/`SliverGridDelegateWithFixedCrossAxisCount` mengatur pembangunan serta tata letak grid.
 
 3. **Apa peran MaterialApp dan mengapa ditempatkan di bagian atas aplikasi?**
 
@@ -97,9 +130,9 @@ dapat dijalankan dengan `flutter test`.
 
    `BuildContext` adalah handle lokasi widget dalam tree, bukan tempat penyimpanan data aplikasi. Context berkaitan dengan `Element` yang memasang widget pada tree. Framework memberikannya kepada `build()` dan callback builder agar kode dapat menemukan dependensi atau layanan yang sesuai dengan lokasi tersebut. Pencarian ancestor bergerak ke atas; context parent tidak dapat menemukan widget baru yang berada di bawahnya. [Dokumentasi BuildContext](https://api.flutter.dev/flutter/widgets/BuildContext-class.html).
 
-   Dalam `MyHomePage.build()`, `Theme.of(context).colorScheme.primary` membaca tema ancestor untuk warna AppBar. Context halaman berada di bawah MaterialApp sehingga tema tersedia. Sebaliknya, context milik `MyApp.build()` berada di atas MaterialApp yang baru dikembalikannya. [Dokumentasi Theme.of](https://api.flutter.dev/flutter/material/Theme/of.html).
+   Dalam `MyHomePage.build()`, `MediaQuery.textScalerOf(context)` membaca skala teks perangkat untuk tinggi kartu aksi. `Navigator.of(context)` membuka halaman koleksi. Context halaman berada di bawah MaterialApp sehingga layanan tersebut tersedia. `Theme.of(context)` juga dapat digunakan untuk membaca tema ancestor, sedangkan context milik `MyApp.build()` berada di atas MaterialApp yang baru dikembalikannya. [Dokumentasi Theme.of](https://api.flutter.dev/flutter/material/Theme/of.html).
 
-   Callback builder grid memberikan context kepada `_handleMenuAction()`. `ScaffoldMessenger.of(context)` memperoleh messenger ancestor, kemudian `hideCurrentSnackBar()` dan `showSnackBar()` mengatur pesan. Jika nanti handler memakai `await`, periksa `if (!context.mounted) return;` sebelum menggunakan context setelah operasi selesai, karena widget mungkin sudah dilepas dari tree. Handler sekarang bersifat sinkron. [Dokumentasi ScaffoldMessenger](https://api.flutter.dev/flutter/material/ScaffoldMessenger-class.html) dan [context.mounted](https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html).
+   Callback builder grid memberikan context kepada `_handleMenuAction()`. `ScaffoldMessenger.of(context)` memperoleh messenger ancestor, kemudian `hideCurrentSnackBar()` dan `showSnackBar()` mengatur pesan. Helper `openPortfolioLink()` memeriksa `if (!context.mounted) return;` setelah `await` sebelum menampilkan pesan, karena halaman mungkin sudah ditutup selama operasi berjalan. [Dokumentasi ScaffoldMessenger](https://api.flutter.dev/flutter/material/ScaffoldMessenger-class.html) dan [context.mounted](https://api.flutter.dev/flutter/widgets/BuildContext/mounted.html).
 
 6. **Apa perbedaan hot reload, hot restart, dan full restart?**
 

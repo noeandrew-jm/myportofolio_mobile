@@ -1,27 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/data/portfolio_actions.dart';
+import 'package:myportofolio_mobile/data/portfolio_content.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
+import 'package:myportofolio_mobile/pages/portfolio_collection_page.dart';
+import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
 import 'package:myportofolio_mobile/widgets/item_card.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_hero.dart';
 
-/// Halaman utama yang menyusun informasi profil dan pilihan menu.
+/// Halaman profil stateless dengan konten dan identitas dari konfigurasi.
 ///
-/// Tidak ada data lokal yang berubah saat tombol ditekan. Umpan balik dikelola
-/// oleh [ScaffoldMessenger], sehingga halaman cukup berupa [StatelessWidget]
-/// tanpa [State] atau pemanggilan `setState`.
+/// Navigator mengelola perpindahan halaman, sementara ScaffoldMessenger
+/// mengelola umpan balik aksi. Halaman tidak membutuhkan state lokal.
 class MyHomePage extends StatelessWidget {
-  /// Profil diberikan oleh bootstrap agar halaman tidak menyimpan identitas
-  /// tertentu dan dapat digunakan kembali dengan data pemilik yang berbeda.
   final PortfolioProfile profile;
 
   const MyHomePage({super.key, required this.profile});
 
-  /// Menangani aksi di tingkat halaman agar kartu hanya mengurus tampilan.
-  ///
-  /// Tutorial ini menampilkan umpan balik saja, termasuk untuk tombol Logout.
-  /// Saat navigasi/autentikasi ditambahkan, perilaku dapat diubah di sini tanpa
-  /// mengikat widget kartu pada rute atau layanan tertentu.
+  static const _collections = [
+    PortfolioCollectionPage(
+      title: 'Projects',
+      introduction: 'Karya yang saya bangun',
+      entries: portfolioProjects,
+    ),
+    PortfolioCollectionPage(
+      title: 'Experience',
+      introduction:
+          'My growing path across software engineering, fintech, '
+          'and student-led collaboration.',
+      entries: portfolioExperiences,
+    ),
+    PortfolioCollectionPage(
+      title: 'Achievements',
+      introduction: 'Milestones in technology, innovation, and collaboration.',
+      entries: portfolioAchievements,
+    ),
+  ];
+
+  void _openCollection(BuildContext context, PortfolioCollectionPage page) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (context) => page));
+  }
+
+  /// Seluruh aksi tetap memberikan pesan sesuai label untuk kriteria Tugas 7.
   void _handleMenuAction(BuildContext context, ItemHomepage item) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -34,76 +56,166 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'MyPortfolio',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                portfolioDetails.displayName,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            const Text('.', style: TextStyle(color: PortfolioColors.accent)),
+          ],
         ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        actions: [
+          PopupMenuButton<PortfolioCollectionPage>(
+            tooltip: 'Navigasi portofolio',
+            icon: const Icon(Icons.more_horiz),
+            onSelected: (page) => _openCollection(context, page),
+            itemBuilder: (context) => [
+              for (final page in _collections)
+                PopupMenuItem(value: page, child: Text(page.title)),
+            ],
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: SafeArea(
-        // Satu viewport menangani profil dan grid. SliverGrid menghindari
-        // pengukuran shrinkWrap pada grid di dalam scroll view lain.
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    Row(
-                      // Tinggi kartu mengikuti isi nama, tanpa pengukuran
-                      // IntrinsicHeight tambahan atau pemotongan teks.
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: InfoCard(title: 'NPM', content: profile.npm),
-                        ),
-                        Expanded(
-                          child: InfoCard(
-                            title: 'Name',
-                            content: profile.fullName,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0.9, -0.1),
+            radius: 1.2,
+            colors: [Color(0xFF24142F), PortfolioColors.background],
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final horizontal = constraints.maxWidth > 1100
+                  ? (constraints.maxWidth - 1060) / 2
+                  : 16.0;
+              return CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 0),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: InfoCard(
+                                  title: 'NPM',
+                                  content: profile.npm,
+                                ),
+                              ),
+                              Expanded(
+                                child: InfoCard(
+                                  title: 'Name',
+                                  content: profile.fullName,
+                                ),
+                              ),
+                              Expanded(
+                                child: InfoCard(
+                                  title: 'Class',
+                                  content: profile.pbpClass,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Expanded(
-                          child: InfoCard(
-                            title: 'Class',
-                            content: profile.pbpClass,
+                          const SizedBox(height: 20),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: [
+                              for (final page in _collections)
+                                TextButton(
+                                  onPressed: () =>
+                                      _openCollection(context, page),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: PortfolioColors.ink,
+                                  ),
+                                  child: Text(page.title),
+                                ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 32.0),
-                    const Text(
-                      'Selamat datang di MyPortfolio Mobile!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18.0,
+                          const SizedBox(height: 36),
+                          PortfolioHero(
+                            details: portfolioDetails,
+                            onViewWork: () =>
+                                _openCollection(context, _collections.first),
+                          ),
+                          const SizedBox(height: 44),
+                          const Divider(color: PortfolioColors.line),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Menu Portofolio',
+                                style: TextStyle(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w600,
+                                  color: PortfolioColors.ink,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(36.0, 20.0, 36.0, 36.0),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 10.0,
-                  mainAxisSpacing: 10.0,
-                  mainAxisExtent: 144.0,
-                ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final item = portfolioActions[index];
-                  return ItemCard(
-                    item,
-                    onTap: () => _handleMenuAction(context, item),
-                  );
-                }, childCount: portfolioActions.length),
-              ),
-            ),
-          ],
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 32),
+                    sliver: SliverGrid(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        // Tinggi bertambah mengikuti pengaturan ukuran teks.
+                        mainAxisExtent:
+                            132 *
+                            MediaQuery.textScalerOf(context).scale(14) /
+                            14,
+                      ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final item = portfolioActions[index];
+                        return ItemCard(
+                          item,
+                          onTap: () => _handleMenuAction(context, item),
+                        );
+                      }, childCount: portfolioActions.length),
+                    ),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 28),
+                    sliver: const SliverToBoxAdapter(
+                      child: Column(
+                        children: [
+                          Divider(color: PortfolioColors.line),
+                          SizedBox(height: 20),
+                          Text(
+                            '© 2026 Noe Andrew\nFakultas Ilmu Komputer, Universitas Indonesia.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: PortfolioColors.muted,
+                              fontSize: 12,
+                              height: 1.7,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

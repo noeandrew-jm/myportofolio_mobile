@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:myportofolio_mobile/data/portfolio_owner.dart';
+import 'package:myportofolio_mobile/data/portfolio_content.dart';
 import 'package:myportofolio_mobile/main.dart';
 import 'package:myportofolio_mobile/menu.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
+import 'package:myportofolio_mobile/pages/portfolio_collection_page.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
 
 void main() {
@@ -18,7 +20,7 @@ void main() {
 
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('MyPortfolio'), findsOneWidget);
+    expect(find.text(portfolioDetails.displayName), findsOneWidget);
     expect(find.byType(InfoCard), findsNWidgets(3));
     for (final field in {
       'NPM': portfolioOwner.npm,
@@ -37,7 +39,10 @@ void main() {
       );
     }
     expect(find.text('Burhan'), findsNothing);
-    expect(find.text('Selamat datang di MyPortfolio Mobile!'), findsOneWidget);
+    expect(
+      find.text(portfolioDetails.displayName.toUpperCase()),
+      findsOneWidget,
+    );
     for (final action in ['Lihat Proyek', 'Tambah Proyek', 'Logout']) {
       await tester.scrollUntilVisible(
         find.text(action),
@@ -111,6 +116,39 @@ void main() {
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.text('Kamu telah menekan tombol $action!'), findsOneWidget);
+    }
+  });
+
+  testWidgets('Portfolio navigation opens the original web collections', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    for (final section in {
+      'Projects': portfolioProjects,
+      'Experience': portfolioExperiences,
+      'Achievements': portfolioAchievements,
+    }.entries) {
+      await tester.tap(find.text(section.key));
+      await tester.pumpAndSettle();
+      expect(find.byType(PortfolioCollectionPage), findsOneWidget);
+      for (final entry in section.value) {
+        await tester.scrollUntilVisible(
+          find.text(entry.title),
+          200,
+          scrollable: find.byType(Scrollable).last,
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(entry.title), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pageBack();
+      await tester.pumpAndSettle();
     }
   });
 }

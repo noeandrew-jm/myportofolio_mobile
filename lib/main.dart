@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:myportofolio_mobile/data/portfolio_owner.dart';
-import 'package:myportofolio_mobile/menu.dart';
+import 'package:myportofolio_mobile/screens/menu.dart';
 import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 
 /// Titik masuk aplikasi; susunan halaman utama dikelola di `menu.dart`.

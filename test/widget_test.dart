@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:myportofolio_mobile/data/portfolio_owner.dart';
 import 'package:myportofolio_mobile/data/portfolio_content.dart';
 import 'package:myportofolio_mobile/main.dart';
-import 'package:myportofolio_mobile/menu.dart';
+import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
 import 'package:myportofolio_mobile/pages/portfolio_collection_page.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
@@ -116,6 +117,15 @@ void main() {
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.text('Kamu telah menekan tombol $action!'), findsOneWidget);
+      if (action == 'Lihat Proyek') {
+        expect(find.byType(PortfolioCollectionPage), findsOneWidget);
+        tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+        await tester.pumpAndSettle();
+      } else if (action == 'Tambah Proyek') {
+        expect(find.byType(ProjectFormPage), findsOneWidget);
+        tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+        await tester.pumpAndSettle();
+      }
     }
   });
 

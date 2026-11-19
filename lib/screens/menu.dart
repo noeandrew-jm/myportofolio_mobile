@@ -4,15 +4,13 @@ import 'package:myportofolio_mobile/data/portfolio_content.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
 import 'package:myportofolio_mobile/pages/portfolio_collection_page.dart';
+import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
-import 'package:myportofolio_mobile/widgets/item_card.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
 import 'package:myportofolio_mobile/widgets/portfolio_hero.dart';
+import 'package:myportofolio_mobile/widgets/project_card.dart';
 
-/// Halaman profil stateless dengan konten dan identitas dari konfigurasi.
-///
-/// Navigator mengelola perpindahan halaman, sementara ScaffoldMessenger
-/// mengelola umpan balik aksi. Halaman tidak membutuhkan state lokal.
 class MyHomePage extends StatelessWidget {
   final PortfolioProfile profile;
 
@@ -39,17 +37,28 @@ class MyHomePage extends StatelessWidget {
   ];
 
   void _openCollection(BuildContext context, PortfolioCollectionPage page) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (context) => page));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (context) => page),
+    );
   }
 
-  /// Seluruh aksi tetap memberikan pesan sesuai label untuk kriteria Tugas 7.
   void _handleMenuAction(BuildContext context, ItemHomepage item) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(content: Text('Kamu telah menekan tombol ${item.name}!')),
       );
+
+    if (item.name == 'Lihat Proyek') {
+      _openCollection(context, _collections.first);
+    } else if (item.name == 'Tambah Proyek') {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (context) => const ProjectFormPage(),
+        ),
+      );
+    }
   }
 
   @override
@@ -82,6 +91,7 @@ class MyHomePage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
+      drawer: const LeftDrawer(),
       body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: RadialGradient(
@@ -177,7 +187,6 @@ class MyHomePage extends StatelessWidget {
                         crossAxisCount: 3,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
-                        // Tinggi bertambah mengikuti pengaturan ukuran teks.
                         mainAxisExtent:
                             132 *
                             MediaQuery.textScalerOf(context).scale(14) /
@@ -200,7 +209,8 @@ class MyHomePage extends StatelessWidget {
                           Divider(color: PortfolioColors.line),
                           SizedBox(height: 20),
                           Text(
-                            '© 2026 Noe Andrew\nFakultas Ilmu Komputer, Universitas Indonesia.',
+                            '© 2026 Noe Andrew\n'
+                            'Fakultas Ilmu Komputer, Universitas Indonesia.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: PortfolioColors.muted,

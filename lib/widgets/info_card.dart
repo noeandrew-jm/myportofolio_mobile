@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 
 /// Kartu label dan nilai yang dapat digunakan untuk berbagai informasi profil.
 ///
@@ -15,14 +16,31 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2.0,
+      elevation: 0,
+      color: PortfolioColors.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: PortfolioColors.line),
+      ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
         child: Column(
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: const TextStyle(
+                color: PortfolioColors.muted,
+                fontSize: 11,
+                letterSpacing: 0.8,
+              ),
+            ),
             const SizedBox(height: 8.0),
-            Text(content, textAlign: TextAlign.center),
+            Text(
+              content,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: PortfolioColors.ink, fontSize: 13),
+            ),
           ],
         ),
       ),

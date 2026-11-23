@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:myportofolio_mobile/forms/portfolio_validators.dart';
+import 'package:myportofolio_mobile/widgets/form_summary.dart';
 import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:myportofolio_mobile/widgets/portfolio_form_body.dart';
 
+/// Menampilkan isian proyek untuk diperiksa sebelum mengosongkan formulir.
 class ProjectFormPage extends StatefulWidget {
   const ProjectFormPage({super.key});
 
@@ -9,15 +13,7 @@ class ProjectFormPage extends StatefulWidget {
 }
 
 class _ProjectFormPageState extends State<ProjectFormPage> {
-  final _formKey = GlobalKey<FormState>();
-
-  String _projectName = '';
-  String _description = '';
-  String _category = 'Web Development';
-  String _technologies = '';
-  String _projectLink = '';
-
-  final List<String> _categories = const [
+  static const _categories = [
     'Web Development',
     'Mobile Development',
     'Machine Learning',
@@ -25,174 +21,103 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     'Other',
   ];
 
+  final _formKey = GlobalKey<FormState>();
+  String _projectName = '';
+  String _description = '';
+  String _category = _categories.first;
+  String _technologies = '';
+  String _projectLink = '';
+
+  Future<void> _submit() async {
+    final form = _formKey.currentState!;
+    if (!form.validate()) return;
+    form.save();
+    final confirmed = await showFormSummary(
+      context,
+      title: 'Ringkasan Proyek',
+      closeLabel: 'OK',
+      fields: {
+        'Nama Proyek': _projectName,
+        'Deskripsi': _description,
+        'Kategori': _category,
+        'Teknologi': _technologies.isEmpty ? '—' : _technologies,
+        'Tautan': _projectLink.isEmpty ? '—' : _projectLink,
+      },
+    );
+    if (mounted && confirmed == true) form.reset();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Project Form'),
-        centerTitle: true,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
-      drawer: const LeftDrawer(),
+      appBar: AppBar(title: const Text('Tambah Proyek')),
+      drawer: const LeftDrawer(currentPage: DrawerPage.project),
       body: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Nama Proyek',
-                    labelText: 'Nama Proyek',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onChanged: (value) =>
-                      setState(() => _projectName = value),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Nama proyek tidak boleh kosong!';
-                    }
-                    return null;
-                  },
-                ),
+        child: PortfolioFormBody(
+          children: [
+            TextFormField(
+              decoration: const InputDecoration(labelText: 'Nama Proyek'),
+              textInputAction: TextInputAction.next,
+              validator: (value) => validatePortfolioText(
+                value,
+                label: 'Nama proyek',
+                emptyMessage: 'Nama proyek tidak boleh kosong!',
+                maxLength: 255,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: TextFormField(
-                  maxLines: 5,
-                  decoration: InputDecoration(
-                    hintText: 'Deskripsi Proyek',
-                    labelText: 'Deskripsi Proyek',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onChanged: (value) =>
-                      setState(() => _description = value),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Deskripsi proyek tidak boleh kosong!';
-                    }
-                    return null;
-                  },
-                ),
+              onSaved: (value) => _projectName = value!.trim(),
+            ),
+            TextFormField(
+              minLines: 3,
+              maxLines: 5,
+              decoration: const InputDecoration(labelText: 'Deskripsi Proyek'),
+              validator: (value) => validatePortfolioText(
+                value,
+                label: 'Deskripsi proyek',
+                emptyMessage: 'Deskripsi proyek tidak boleh kosong!',
               ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: DropdownButtonFormField<String>(
-                  initialValue: _category,
-                  decoration: InputDecoration(
-                    labelText: 'Kategori Proyek',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  items: _categories
-                      .map(
-                        (category) => DropdownMenuItem(
-                          value: category,
-                          child: Text(category),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _category = value);
-                    }
-                  },
-                ),
+              onSaved: (value) => _description = value!.trim(),
+            ),
+            DropdownButtonFormField<String>(
+              initialValue: _categories.first,
+              decoration: const InputDecoration(labelText: 'Kategori Proyek'),
+              isExpanded: true,
+              items: [
+                for (final category in _categories)
+                  DropdownMenuItem(value: category, child: Text(category)),
+              ],
+              onChanged: (_) {},
+              onSaved: (value) => _category = value!,
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Teknologi yang Digunakan',
+                hintText: 'Contoh: Flutter, Django, Figma',
               ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'Contoh: Flutter, Django, Figma',
-                    labelText: 'Teknologi yang Digunakan',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onChanged: (value) =>
-                      setState(() => _technologies = value),
-                ),
+              textInputAction: TextInputAction.next,
+              validator: (value) => validatePortfolioText(
+                value,
+                label: 'Teknologi',
+                maxLength: 255,
               ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    hintText: 'URL Proyek (opsional)',
-                    labelText: 'Tautan Proyek',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onChanged: (value) =>
-                      setState(() => _projectLink = value),
-                ),
+              onSaved: (value) => _technologies = value?.trim() ?? '',
+            ),
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Tautan Proyek',
+                hintText: 'https://contoh.id (opsional)',
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
-                        Colors.indigo,
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        showDialog<void>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Proyek berhasil ditambahkan!'),
-                            content: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Nama Proyek: $_projectName'),
-                                  Text('Deskripsi: $_description'),
-                                  Text('Kategori: $_category'),
-                                  Text('Teknologi: $_technologies'),
-                                  Text('Tautan: $_projectLink'),
-                                ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  _formKey.currentState!.reset();
-                                  setState(() {
-                                    _projectName = '';
-                                    _description = '';
-                                    _category = 'Web Development';
-                                    _technologies = '';
-                                    _projectLink = '';
-                                  });
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      'Save',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              validator: validateProjectUrl,
+              onSaved: (value) => _projectLink = value?.trim() ?? '',
+            ),
+            FilledButton.icon(
+              onPressed: _submit,
+              icon: const Icon(Icons.check),
+              label: const Text('Simpan'),
+            ),
+          ],
         ),
       ),
     );

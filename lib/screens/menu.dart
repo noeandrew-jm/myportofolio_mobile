@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:myportofolio_mobile/data/portfolio_actions.dart';
 import 'package:myportofolio_mobile/data/portfolio_content.dart';
 import 'package:myportofolio_mobile/models/item_homepage.dart';
 import 'package:myportofolio_mobile/models/portfolio_profile.dart';
 import 'package:myportofolio_mobile/pages/portfolio_collection_page.dart';
+import 'package:myportofolio_mobile/screens/experience_form.dart';
 import 'package:myportofolio_mobile/screens/project_form.dart';
 import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 import 'package:myportofolio_mobile/widgets/info_card.dart';
@@ -37,9 +38,8 @@ class MyHomePage extends StatelessWidget {
   ];
 
   void _openCollection(BuildContext context, PortfolioCollectionPage page) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (context) => page),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (context) => page));
   }
 
   void _handleMenuAction(BuildContext context, ItemHomepage item) {
@@ -49,15 +49,14 @@ class MyHomePage extends StatelessWidget {
         SnackBar(content: Text('Kamu telah menekan tombol ${item.name}!')),
       );
 
-    if (item.name == 'Lihat Proyek') {
-      _openCollection(context, _collections.first);
-    } else if (item.name == 'Tambah Proyek') {
-      Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (context) => const ProjectFormPage(),
-        ),
-      );
+    final page = switch (item.action) {
+      HomeAction.viewProjects => _collections.first,
+      HomeAction.addProject => const ProjectFormPage(),
+      HomeAction.addExperience => const ExperienceFormPage(),
+      HomeAction.logout => null,
+    };
+    if (page != null) {
+      Navigator.push(context, MaterialPageRoute<void>(builder: (_) => page));
     }
   }
 
@@ -184,7 +183,7 @@ class MyHomePage extends StatelessWidget {
                     padding: EdgeInsets.fromLTRB(horizontal, 0, horizontal, 32),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
+                        crossAxisCount: constraints.maxWidth >= 720 ? 4 : 2,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                         mainAxisExtent:

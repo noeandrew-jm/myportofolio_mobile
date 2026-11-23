@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:myportofolio_mobile/theme/portfolio_theme.dart';
 
 /// Kartu label dan nilai yang dapat digunakan untuk berbagai informasi profil.
@@ -15,31 +15,45 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: PortfolioColors.surface,
-      surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: PortfolioColors.line),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+    return MergeSemantics(
+      child: Container(
+        margin: const EdgeInsets.all(3),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 12),
+        decoration: BoxDecoration(
+          color: PortfolioColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: PortfolioColors.line),
+        ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: PortfolioColors.muted,
-                fontSize: 11,
-                letterSpacing: 0.8,
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                border: BorderDirectional(
+                  start: BorderSide(color: PortfolioColors.accent, width: 2),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(start: 6),
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: PortfolioColors.muted,
+                    fontSize: 12,
+                    height: 1.25,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 8),
             Text(
               content,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: PortfolioColors.ink, fontSize: 13),
+              style: const TextStyle(
+                color: PortfolioColors.ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
             ),
           ],
         ),

@@ -7,7 +7,7 @@ serta gambar karya mengikuti referensi web.
 ## Halaman utama
 
 - `lib/main.dart` menangani bootstrap, `MaterialApp`, dan tema aplikasi.
-- `MyHomePage` di `lib/menu.dart` merupakan `StatelessWidget`, terpisah dari bootstrap.
+- `MyHomePage` di `lib/screens/menu.dart` merupakan `StatelessWidget`, terpisah dari bootstrap.
 - Tiga `InfoCard` menampilkan **NPM**, **Name**, dan **Class** dari konfigurasi identitas `lib/data/portfolio_owner.dart` melalui model `PortfolioProfile`.
 - Nama lengkap membungkus ke beberapa baris tanpa pemotongan; tiga kartu tetap sejajar di bagian atas.
 - Profil lengkap, bio, kontak, satu proyek, tiga pengalaman, dan dua prestasi
@@ -24,11 +24,12 @@ Label, ikon, dan warna didefinisikan dalam konstanta `portfolioActions` di `lib/
 | --- | --- | --- | --- |
 | Lihat Proyek | `Icons.folder` | Biru `#1565C0` | `Kamu telah menekan tombol Lihat Proyek!` |
 | Tambah Proyek | `Icons.add_circle` | Hijau `#2E7D32` | `Kamu telah menekan tombol Tambah Proyek!` |
+| Tambah Pengalaman | `Icons.work_outline` | Ungu `#75429A` | `Kamu telah menekan tombol Tambah Pengalaman!` |
 | Logout | `Icons.logout` | Merah `#C62828` | `Kamu telah menekan tombol Logout!` |
 
-Ketiga kartu aksi menampilkan SnackBar sesuai labelnya. Tambah Proyek dan Logout
-masih berupa umpan balik untuk Tugas 7. Navigasi koleksi tersedia melalui menu
-halaman dan tombol View my work.
+Keempat kartu menampilkan SnackBar sesuai labelnya. **Tambah Proyek** dan
+**Tambah Pengalaman** membuka formulir masing-masing. **Lihat Proyek** membuka
+koleksi proyek, sedangkan **Logout** menampilkan umpan balik dari Tugas 7.
 
 ## Pemisahan kode dan optimasi
 
@@ -147,3 +148,39 @@ dapat dijalankan dengan `flutter test`.
    Initializer global/static yang nilainya sudah tersimpan sebagai state, termasuk variabel `final`, tidak dieksekusi ulang oleh hot reload; hot restart menerapkan inisialisasi baru. [Panduan VS Code](https://docs.flutter.dev/tools/vs-code#hot-reload-vs-hot-restart). Konstanta berbeda: perubahan nilai `const` didukung hot reload, sehingga perubahan `portfolioOwner` atau `portfolioActions` tidak selalu membutuhkan hot restart. [Batasan dan perilaku konstanta](https://docs.flutter.dev/tools/hot-reload#recent-code-change-is-included-but-app-state-is-excluded).
 
    Perubahan Kotlin/Java/Swift/Objective-C atau penambahan plugin dengan kode platform memerlukan build dan full restart. [Panduan penggunaan package](https://docs.flutter.dev/packages-and-plugins/using-packages). Saat mengganti Flutter/Dart SDK, hentikan sesi lama dan jalankan kembali dengan SDK yang dipilih; ini langkah operasional agar toolchain baru digunakan. [Panduan upgrade SDK](https://docs.flutter.dev/install/upgrade).
+
+### Tugas 8
+
+Bagian **Pengalaman** mengikuti model `Experience` pada portofolio web. Di aplikasi ini, **Simpan** menampilkan ringkasan untuk diperiksa. Isian hanya ada selama formulir terbuka dan tidak dikirim ke basis data. [Formulir Pengalaman](lib/screens/experience_form.dart)
+
+1. **Apa perbedaan `push()`, `pushReplacement()`, dan `pop()`? Bagaimana kartu aksi dan opsi Home menggunakannya?**
+
+   Kartu **Tambah Pengalaman** memanggil `Navigator.push()` untuk menaruh formulir di atas beranda. Karena beranda masih berada dalam tumpukan, tombol kembali perangkat dapat membukanya lagi. `pushReplacement()` mengganti halaman teratas. Drawer memakainya ketika pengguna berpindah langsung dari formulir proyek ke pengalaman, sehingga tombol kembali tidak membawa pengguna melewati formulir lama. `pop()` melepas rute teratas. Saat dialog terbuka, **Tutup** memakai metode ini agar pengguna kembali ke isian yang baru diperiksa.
+
+   Opsi **Home** menutup drawer lalu memanggil `popUntil((route) => route.isFirst)`. Rute pertama adalah beranda yang sudah terbuka sejak awal, sehingga memilih Home di Chrome juga mengembalikan posisi gulir beranda. [Menu](lib/screens/menu.dart) dan [drawer](lib/widgets/left_drawer.dart)
+
+2. **Bagaimana struktur dan warna halaman dijaga konsisten?**
+
+   Beranda dan kedua formulir memakai `Scaffold` untuk menempatkan `AppBar` di atas, isi halaman di `body`, dan `LeftDrawer` di sisi kiri. Ketiga halaman mengambil warna latar dan teks AppBar serta font Kanit dari tema yang sama. Aksen ungu `#BC6DF0` terlihat pada titik setelah nama pemilik di beranda, pilihan aktif di drawer, dan tombol **Simpan** di formulir. [Tema portofolio](lib/theme/portfolio_theme.dart)
+
+3. **Mengapa formulir memakai satu kolom dan bagaimana semua input tetap terjangkau?**
+
+   Nama peran, kategori, deskripsi, dan kedua tanggal dapat diisi dari atas ke bawah. `Padding` memberi jarak dari tepi kartu, dan `Column.spacing` memberi jarak 16 piksel logis antarinput. Pada layar lebar, `ConstrainedBox` membatasi kartu hingga 640 piksel logis. Saat papan ketik muncul, `Scaffold` menyesuaikan tinggi body dan `SingleChildScrollView` memungkinkan pengguna menggulir sampai tombol **Simpan**. Dialog juga dapat digulir jika deskripsi panjang. [Tata letak formulir](lib/widgets/portfolio_form_body.dart)
+
+4. **Apa peran `GlobalKey<FormState>`, `validator`, dan `validate()` saat Simpan ditekan?**
+
+   `GlobalKey<FormState>` memberi tombol akses ke formulir yang sedang diisi. `validate()` menjalankan setiap `validator`. Field yang gagal menampilkan pesan di bawah input, dan dialog hanya dibuka bila semua field lolos. Nama peran wajib berisi teks setelah `trim()` dan dibatasi 255 karakter sesuai model. Deskripsi juga wajib diisi dan dropdown membatasi kategori ke enam pilihan model.
+
+   Pemilih tanggal membantu memasukkan tanggal kalender yang sah, tetapi dua tanggal yang sah masih bisa membentuk periode yang keliru. Misalnya, jika tanggal mulai **10/04/2024** dan tanggal selesai **08/03/2024**, kolom tanggal selesai menampilkan pesan kesalahan. Jika tanggal selesai dikosongkan, ringkasan menampilkan **Masih berlangsung**. Demikian pula, papan ketik URL pada formulir proyek masih memungkinkan teks seperti `bukan-url`, sehingga format tautan diperiksa oleh validator.
+
+#### Penggunaan AI
+
+1. Tools
+Claude Sonnet 5.5 (web)
+GPT-6 Luna (VS Code)
+2. Prompt Strategy
+Menanyakan pertanyaan untuk readme
+Menanyakan integrasi web ke app 
+3. Prompting Log 
+   a. Membentuk struktur proyek: https://claude.ai/chat/2d364f31-92fb-499b-9eaa-92119de810d9 56659c6d-aa10-4961-b9fb-f088c00cd4ee 
+   b. Bug fixing: GPT-6 Luna (dalam session VS Code)

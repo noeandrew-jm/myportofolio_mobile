@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Palet diambil dari variabel CSS portofolio web agar seluruh halaman seragam.
 abstract final class PortfolioColors {
@@ -28,6 +28,10 @@ final portfolioTheme = ThemeData(
     surfaceTintColor: Colors.transparent,
     centerTitle: false,
     elevation: 0,
+  ),
+  inputDecorationTheme: const InputDecorationThemeData(
+    border: OutlineInputBorder(),
+    errorMaxLines: 3,
   ),
   snackBarTheme: const SnackBarThemeData(
     backgroundColor: Color(0xFF32203E),
